@@ -4,7 +4,12 @@ import {
     GET_CLIENT_FAILURE,
     ADD_CLIENT,
     ADD_CLIENT_SUCCESS,
-    ADD_CLIENT_FAILURE
+    ADD_CLIENT_FAILURE,
+    UPDATE_CLIENT,
+    UPDATE_CLIENT_SUCCESS,
+    UPDATE_CLIENT_FAILURE,
+    
+
 } from '../actions';
 
 const initialState = {
@@ -52,6 +57,25 @@ export default function clientsReducer(state = initialState, action){
                 addingClients: false,
                 error: action.payload
             }
+        case UPDATE_CLIENT:
+            return {
+                ...state,
+                updatingClients: true,
+                client: action.payload
+            }
+         case UPDATE_CLIENT_SUCCESS:
+            return {
+                ...state,
+                updatingClients: false,
+                clients: state.clients.concat(action.payload)
+            }
+        case UPDATE_CLIENT_FAILURE:
+            return {
+                ...state,
+                updatingClients: false,
+                error: action.payload
+            }
+        
         default:
             return state
     }

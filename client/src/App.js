@@ -2,20 +2,23 @@ import React, {Component} from 'react';
 import axios from 'axios';
 import ClientForm from './components/ClientForm';
 import Clients from './components/Clients'
+import UpdateForm from './components/UpdateForm';
+import Client from './components/Client';
+
 import { Route} from 'react-router-dom';
+
 
 import './App.css';
 
 class App extends Component {
 
-  constructor(props){
-     super(props);
+  constructor(){
+     super();
      this.state = {
-       clients: []
+       clients: [],
+       activeClient: null
      }
   }
-
-  
 
   componentDidMount(){
     axios.get('http://localhost:5000/clients')
@@ -28,22 +31,51 @@ class App extends Component {
     .catch(err => console.log(err))
   }
 
-  addClient = (newClient) => {
-     this.setState({
-        clients: [...this.state.clients, newClient]
-     })
-  }
-
-  deleteClient = (id) => {
-    console.log('del method', id)
-     axios.delete(`http://localhost:5000/clients/${id}`)
-     .then(res => {
-      console.log(this.state.clients, res.data)
+  addClient = newClient => {
+    axios.post('http://localhost:5000/clients')
+    .then(res => {
        this.setState({
          clients: res.data
        })
+       this.props.history.push("/client-list")
      })
      .catch(err => console.log(err))
+  }
+
+  deleteClient = (id) => {
+     axios.delete(`http://localhost:5000/clients/${id}`)
+     .then(res => {
+       this.setState({
+         clients: res.data
+       })
+       this.props.history.push("/client-list")
+     })
+     .catch(err => console.log(err))
+  }
+
+  // populateForm = (client) => {
+  //     this.setState({
+  //        activateItem: client
+  //     })
+  //     this.props.history.push("/client-form")
+  // }
+
+
+  updateClient = (updateClient) => {
+    axios.put(`http://localhost:5000/clients/${updateClient.id}`, updateClient)
+     .then(res => {
+       this.setState({
+         clients: res.data
+       })
+       this.props.history.push("/client-list")
+     })
+     .catch(err => console.log(err))
+  }
+
+  setActiveClient = client => {
+     this.setState({
+        activeClient: client
+     })
   }
 
   render(){
@@ -52,10 +84,22 @@ class App extends Component {
   
     <div className="App">
        <h1>Welcome Taco Client</h1>
+       <Route 
+            path="/new-client" 
+            render={props => <ClientForm  
+                             addClient={this.state.addClient} {...props}  />}
+       />
+       <Route 
+            path="/client-list/:id"
+            render={props => (<Client clients={this.state.clients} 
+                                      setActiveClient={this.activeClient} 
+                                      deleteClient={this.deleteClient} />)  }
+       />
 
-       <Route path="/clients" render={(props) => <ClientForm {...props} addClient={this.addClient}/>}  />
-       {/* <ClientForm onSubmit={this.addClient} /> */}
-       <Clients clients={this.state.clients} deleteClient={this.deleteClient}/>
+       <Route path="/update-client" render={(props) => <UpdateForm {...props} addClient={this.addClient}/>}  />
+
+      
+       <Clients clients={this.state.clients} deleteClient={this.deleteClient} updateClient={this.updateClient} />
     </div>
    
   )
